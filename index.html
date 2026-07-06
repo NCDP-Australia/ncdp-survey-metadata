@@ -108,14 +108,22 @@ button:disabled { opacity:0.4; cursor:not-allowed; }
     <div class="form-grid">
 
       <!-- 1. Location -->
-      <div class="form-field full">
+      <div class="form-field">
         <label><span class="field-num">1</span> Location <span class="badge badge-req">required</span></label>
-        <select id="fLocation">
-          <option value="">Select a site…</option>
-          <option>Anglesea</option><option>Barwon Heads</option><option>Belongil Beach</option>
-          <option>Cape Woolamai</option><option>Inverloch</option><option>Merimbula</option>
-          <option>Moruya</option><option>Narrabeen</option><option>Ninety Mile Beach</option>
-          <option>Port Fairy</option><option>Torquay</option><option>Other (specify in comments)</option>
+        <input type="text" id="fLocation" placeholder="e.g. Port Fairy" />
+      </div>
+      <div class="form-field">
+        <label>State / territory <span class="badge badge-req">required</span></label>
+        <select id="fState">
+          <option value="">Select…</option>
+          <option>Victoria</option>
+          <option>New South Wales</option>
+          <option>Queensland</option>
+          <option>South Australia</option>
+          <option>Western Australia</option>
+          <option>Tasmania</option>
+          <option>Northern Territory</option>
+          <option>Australian Capital Territory</option>
         </select>
       </div>
 
@@ -271,7 +279,7 @@ button:disabled { opacity:0.4; cursor:not-allowed; }
 
   <!-- Processing report upload -->
   <div class="card">
-    <div class="card-title">Processing report <span class="badge badge-opt" style="vertical-align:middle">optional but recommended</span></div>
+    <div class="card-title">Processing report <span class="badge badge-req" style="vertical-align:middle">required</span></div>
     <div class="file-drop" id="fileDrop">
       <p>Drop your processing report here, or <strong>click to browse</strong></p>
       <p style="margin-top:4px; font-size:12px;">PDF, HTML, or ZIP — flying height, image count, accuracy stats will be extracted from this</p>
@@ -362,7 +370,7 @@ function v(id) { const el = document.getElementById(id); return el ? el.value.tr
 
 const CSV_FIELDS = [
   'submitted_at','email','organisation',
-  'location','pilot_in_command','flight_crew',
+  'location','state','pilot_in_command','flight_crew',
   'predominant_cloud_type','cloud_cover_oktas','wind_speed_knots','wind_direction',
   'type_of_gcps','data_processing_person_institution',
   'icps_used','number_of_icps','icp_horizontal_epsg','icp_vertical_datum','icp_rmse_m',
@@ -377,6 +385,7 @@ function buildRow() {
     email: v('fEmail'),
     organisation: v('fOrg'),
     location: v('fLocation'),
+    state: v('fState'),
     pilot_in_command: v('fPilot'),
     flight_crew: v('fCrew'),
     predominant_cloud_type: v('fCloudType'),
@@ -400,8 +409,9 @@ function buildRow() {
 
 function validate() {
   const required = [
-    ['fEmail','Email'],['fLocation','Location'],['fPilot','Pilot in Command'],
-    ['fCrew','Flight Crew'],['fCloudType','Cloud Type'],['fCloud','Cloud Cover'],
+    ['fEmail','Email'],['fLocation','Location'],['fState','State / territory'],
+    ['fPilot','Pilot in Command'],['fCrew','Flight Crew'],
+    ['fCloudType','Cloud Type'],['fCloud','Cloud Cover'],
     ['fWind','Wind Speed'],['fWindDir','Wind Direction'],['fGCPType','Type of GCPs'],
     ['fProcessedBy','Data Processing person/institution'],
     ['fICP','ICPs Used'],['fAncillary','Associated ancillary data'],
@@ -411,6 +421,7 @@ function validate() {
     if (!v(id)) return `"${label}" is required.`;
   }
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('fEmail'))) return 'Please enter a valid email address.';
+  if (!reportFile) return 'Please attach a processing report before submitting.';
   if (v('fICP') === 'Yes') {
     if (!v('fICPCount')) return 'Number of ICPs is required when ICPs were used.';
     if (!v('fICPEPSG')) return 'ICP horizontal EPSG is required when ICPs were used.';
@@ -492,10 +503,11 @@ document.getElementById('downloadAgainBtn').addEventListener('click', () => {
 
 // ---- Reset --------------------------------------------------------------
 document.getElementById('resetBtn').addEventListener('click', () => {
-  ['fEmail','fOrg','fPilot','fCrew','fProcessedBy','fICPCount','fICPEPSG','fICPRMSE','fComments']
+  ['fEmail','fOrg','fLocation','fPilot','fCrew','fProcessedBy','fICPCount','fICPEPSG','fICPRMSE','fComments']
     .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   ['fLocation','fCloudType','fCloud','fWind','fWindDir','fGCPType','fICP','fICPVert','fAncillary','fWorks','fWorksType']
     .forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+  document.getElementById('fState').selectedIndex = 0;
   reportFile = null;
   document.getElementById('fileChosen').textContent = '';
   document.getElementById('formError').textContent = '';
