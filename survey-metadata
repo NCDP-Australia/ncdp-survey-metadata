@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NCDP — Survey Metadata Submission</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal:#0F6E56; --teal-mid:#1D9E75; --teal-light:#E1F5EE;
+  --text:#1a1a1a; --text-muted:#6b6b6b; --text-hint:#9e9e9e;
+  --bg:#ffffff; --bg-page:#f5f7f6; --bg-surface:#f0f4f2;
+  --border:rgba(0,0,0,0.1); --border-mid:rgba(0,0,0,0.18);
+  --success-bg:#e1f5ee; --success-tx:#085041;
+  --warn-bg:#faeeda; --warn-tx:#633806;
+  --danger-bg:#fcebeb; --danger-tx:#791f1f;
+  --radius:8px; --radius-lg:12px;
+}
+@media (prefers-color-scheme:dark) {
+  :root {
+    --teal:#5DCAA5; --teal-light:#04342C;
+    --text:#f0f0f0; --text-muted:#a0a0a0; --text-hint:#555;
+    --bg:#1a1e1c; --bg-page:#141716; --bg-surface:#1f2421;
+    --border:rgba(255,255,255,0.1); --border-mid:rgba(255,255,255,0.18);
+    --success-bg:#04342C; --success-tx:#9FE1CB;
+    --warn-bg:#412402; --warn-tx:#FAC775;
+    --danger-bg:#501313; --danger-tx:#F09595;
+  }
+}
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif; background:var(--bg-page); color:var(--text); font-size:15px; line-height:1.6; min-height:100vh; }
+header { background:var(--bg); border-bottom:0.5px solid var(--border); padding:0 2rem; display:flex; align-items:center; gap:1rem; height:56px; }
+.logo-mark { width:28px; height:28px; background:var(--teal); border-radius:6px; display:flex; align-items:center; justify-content:center; }
+.logo-mark svg { width:16px; height:16px; fill:#fff; }
+.logo-text { font-size:14px; font-weight:500; color:var(--text); }
+.logo-text span { color:var(--text-muted); font-weight:400; }
+.layout { max-width:680px; margin:0 auto; padding:2.5rem 1.5rem 4rem; }
+.page-header { margin-bottom:2rem; }
+.page-header h1 { font-size:22px; font-weight:500; margin-bottom:4px; }
+.page-header p { font-size:14px; color:var(--text-muted); }
+.card { background:var(--bg); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem 1.5rem; margin-bottom:1rem; }
+.card-title { font-size:12px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:1rem; }
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-field { display:flex; flex-direction:column; gap:5px; }
+.form-field.full { grid-column:1/-1; }
+.sub-fields { grid-column:1/-1; background:var(--bg-surface); border-radius:var(--radius); padding:12px; display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:4px; }
+.sub-fields .form-field.full { grid-column:1/-1; }
+label { font-size:12px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.04em; display:flex; align-items:center; gap:6px; }
+.badge { font-size:10px; padding:1px 6px; border-radius:4px; font-weight:400; text-transform:none; letter-spacing:0; }
+.badge-req { background:var(--warn-bg); color:var(--warn-tx); }
+.badge-opt { background:var(--bg-surface); color:var(--text-muted); }
+input[type=text],input[type=email],input[type=number],input[type=date],select,textarea { width:100%; padding:8px 10px; border:0.5px solid var(--border-mid); border-radius:var(--radius); background:var(--bg); color:var(--text); font-size:14px; font-family:inherit; outline:none; transition:border-color 0.1s; }
+input:focus,select:focus,textarea:focus { border-color:var(--teal); }
+textarea { resize:vertical; min-height:80px; line-height:1.5; }
+select { cursor:pointer; }
+.file-drop { border:1.5px dashed var(--border-mid); border-radius:var(--radius); padding:1.5rem; text-align:center; cursor:pointer; transition:background 0.12s,border-color 0.12s; }
+.file-drop:hover,.file-drop.over { background:var(--teal-light); border-color:var(--teal); }
+.file-drop p { font-size:13px; color:var(--text-muted); }
+.file-drop input { display:none; }
+.file-chosen { font-size:13px; color:var(--teal); margin-top:8px; font-family:monospace; }
+.info-box { background:var(--bg-surface); border-left:2px solid var(--teal); border-radius:0 var(--radius) var(--radius) 0; padding:10px 14px; font-size:13px; color:var(--text-muted); margin-top:1rem; }
+.field-num { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; background:var(--teal-light); color:var(--teal); border-radius:4px; font-size:11px; font-weight:600; flex-shrink:0; margin-right:2px; }
+.btn-row { display:flex; justify-content:flex-end; gap:8px; margin-top:1.5rem; }
+button { padding:9px 20px; border-radius:var(--radius); font-size:14px; font-weight:500; cursor:pointer; border:0.5px solid var(--border-mid); background:transparent; color:var(--text); font-family:inherit; transition:background 0.1s; }
+button:hover { background:var(--bg-surface); }
+button.primary { background:var(--teal); color:#fff; border-color:var(--teal); }
+button.primary:hover { opacity:0.88; }
+button:disabled { opacity:0.4; cursor:not-allowed; }
+.success-card { background:var(--success-bg); border:0.5px solid var(--teal); border-radius:var(--radius-lg); padding:2rem; text-align:center; }
+.success-card svg { width:32px; height:32px; stroke:var(--teal); fill:none; stroke-width:1.5; margin-bottom:12px; }
+.success-card h3 { font-size:16px; font-weight:500; color:var(--success-tx); margin-bottom:6px; }
+.success-card p { font-size:13px; color:var(--success-tx); opacity:0.85; }
+.preview-wrap { background:var(--bg-surface); border-radius:var(--radius); padding:12px 14px; font-size:12px; font-family:monospace; color:var(--text-muted); white-space:pre-wrap; word-break:break-word; max-height:180px; overflow-y:auto; margin-top:1rem; }
+@media(max-width:600px) { .form-grid,.sub-fields { grid-template-columns:1fr; } .form-field.full,.sub-fields .form-field.full { grid-column:1; } header { padding:0 1rem; } .layout { padding:1.5rem 1rem 3rem; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark"><svg viewBox="0 0 20 20"><path d="M10 2C5.6 2 2 5.6 2 10s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8zm0 3c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm0 9.5c-2.5 0-4.7-1.3-6-3.2.5-2 5-3.1 6-3.1s5.5 1.1 6 3.1c-1.3 1.9-3.5 3.2-6 3.2z"/></svg></div>
+  <span class="logo-text">NCDP <span>/ Survey metadata</span></span>
+</header>
+
+<div class="layout">
+<div id="formView">
+  <div class="page-header">
+    <h1>Submit survey metadata</h1>
+    <p>13 fields required for each survey capture. Flying height, image count, and accuracy statistics will be extracted from your processing report.</p>
+  </div>
+
+  <!-- Contact -->
+  <div class="card">
+    <div class="card-title">Your details</div>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Email <span class="badge badge-req">required</span></label>
+        <input type="email" id="fEmail" placeholder="e.g. operator@example.com.au" />
+      </div>
+      <div class="form-field">
+        <label>Organisation <span class="badge badge-opt">optional</span></label>
+        <input type="text" id="fOrg" placeholder="e.g. Deakin University" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 13 required fields -->
+  <div class="card">
+    <div class="card-title">Survey metadata — 13 required fields</div>
+    <div class="form-grid">
+
+      <!-- 1. Location -->
+      <div class="form-field full">
+        <label><span class="field-num">1</span> Location <span class="badge badge-req">required</span></label>
+        <select id="fLocation">
+          <option value="">Select a site…</option>
+          <option>Anglesea</option><option>Barwon Heads</option><option>Belongil Beach</option>
+          <option>Cape Woolamai</option><option>Inverloch</option><option>Merimbula</option>
+          <option>Moruya</option><option>Narrabeen</option><option>Ninety Mile Beach</option>
+          <option>Port Fairy</option><option>Torquay</option><option>Other (specify in comments)</option>
+        </select>
+      </div>
+
+      <!-- 2. Pilot in Command -->
+      <div class="form-field">
+        <label><span class="field-num">2</span> Pilot in Command <span class="badge badge-req">required</span></label>
+        <input type="text" id="fPilot" placeholder="Full name" />
+      </div>
+
+      <!-- 3. Flight Crew -->
+      <div class="form-field">
+        <label><span class="field-num">3</span> Flight Crew <span class="badge badge-req">required</span></label>
+        <input type="text" id="fCrew" placeholder="Names, or 'Solo'" />
+      </div>
+
+      <!-- 4. Predominant Cloud Type -->
+      <div class="form-field">
+        <label><span class="field-num">4</span> Predominant Cloud Type <span class="badge badge-req">required</span></label>
+        <select id="fCloudType">
+          <option value="">Select…</option>
+          <option>None</option><option>Cumulus</option><option>Stratus</option>
+          <option>Cirrus</option><option>Cumulonimbus</option><option>Mixed</option>
+        </select>
+      </div>
+
+      <!-- 5. Cloud Cover -->
+      <div class="form-field">
+        <label><span class="field-num">5</span> Cloud Cover (oktas) <span class="badge badge-req">required</span></label>
+        <select id="fCloud">
+          <option value="">Select…</option>
+          <option>0 — Clear</option><option>1</option><option>2</option><option>3</option>
+          <option>4 — Half covered</option><option>5</option><option>6</option><option>7</option>
+          <option>8 — Overcast</option><option>9 — Sky obscured</option>
+        </select>
+      </div>
+
+      <!-- 6. Wind Speed -->
+      <div class="form-field">
+        <label><span class="field-num">6</span> Wind Speed (knots) <span class="badge badge-req">required</span></label>
+        <select id="fWind">
+          <option value="">Select…</option>
+          <option>0–5</option><option>5–10</option><option>10–15</option>
+          <option>15–20</option><option>20+</option>
+        </select>
+      </div>
+
+      <!-- 7. Wind Direction -->
+      <div class="form-field">
+        <label><span class="field-num">7</span> Wind Direction <span class="badge badge-req">required</span></label>
+        <select id="fWindDir">
+          <option value="">Select…</option>
+          <option>N</option><option>NE</option><option>E</option><option>SE</option>
+          <option>S</option><option>SW</option><option>W</option><option>NW</option>
+          <option>Variable</option>
+        </select>
+      </div>
+
+      <!-- 8. Type of GCPs -->
+      <div class="form-field">
+        <label><span class="field-num">8</span> Type of GCPs <span class="badge badge-req">required</span></label>
+        <select id="fGCPType">
+          <option value="">Select…</option>
+          <option>AeroPoints V2</option><option>AeroPoints V1</option>
+          <option>Tiles</option><option>Permanent marks</option>
+          <option>PPK only</option><option>RTK only</option><option>None</option>
+        </select>
+      </div>
+
+      <!-- 9. Data Processing person/institution -->
+      <div class="form-field full">
+        <label><span class="field-num">9</span> Data Processing person and/or institution <span class="badge badge-req">required</span></label>
+        <input type="text" id="fProcessedBy" placeholder="e.g. Jane Smith, Deakin University" />
+      </div>
+
+      <!-- 10. ICPs used — triggers sub-questions -->
+      <div class="form-field full">
+        <label><span class="field-num">10</span> Were ICPs Used? <span class="badge badge-req">required</span></label>
+        <select id="fICP" onchange="toggleICP()">
+          <option value="">Select…</option>
+          <option>Yes</option><option>No</option>
+        </select>
+      </div>
+      <div class="sub-fields" id="icpSub" style="display:none">
+        <div class="form-field">
+          <label>Number of ICPs <span class="badge badge-req">required</span></label>
+          <input type="number" id="fICPCount" placeholder="e.g. 5" min="0" max="50" />
+        </div>
+        <div class="form-field">
+          <label>ICP Horizontal EPSG <span class="badge badge-req">required</span></label>
+          <input type="text" id="fICPEPSG" placeholder="e.g. 7855" />
+        </div>
+        <div class="form-field">
+          <label>ICP Vertical Datum <span class="badge badge-req">required</span></label>
+          <select id="fICPVert">
+            <option value="">Select…</option>
+            <option>AHD09</option><option>AHD71</option>
+            <option>Ellipsoid</option><option>MSL</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label>ICP RMSE (m) <span class="badge badge-req">required</span></label>
+          <input type="number" id="fICPRMSE" placeholder="e.g. 0.025" step="0.001" min="0" />
+        </div>
+      </div>
+
+      <!-- 11. Associated ancillary data or images -->
+      <div class="form-field full">
+        <label><span class="field-num">11</span> Associated ancillary data or images <span class="badge badge-req">required</span></label>
+        <select id="fAncillary">
+          <option value="">Select…</option>
+          <option>None</option>
+          <option>Oblique photos</option>
+          <option>Ground-level photos</option>
+          <option>Video footage</option>
+          <option>Multispectral imagery</option>
+          <option>LiDAR</option>
+          <option>Multiple — see comments</option>
+        </select>
+      </div>
+
+      <!-- 12. Coastal management works — triggers sub-question -->
+      <div class="form-field full">
+        <label><span class="field-num">12</span> Did Coastal Management Works Occur Between the Previous Survey and This Survey? <span class="badge badge-req">required</span></label>
+        <select id="fWorks" onchange="toggleWorks()">
+          <option value="">Select…</option>
+          <option>Yes</option><option>No</option><option>Unknown</option>
+        </select>
+      </div>
+      <div class="sub-fields" id="worksSub" style="display:none">
+        <div class="form-field full">
+          <label>Type of Coastal Management Works <span class="badge badge-req">required</span></label>
+          <select id="fWorksType">
+            <option value="">Select…</option>
+            <option>Beach nourishment / sand replenishment</option>
+            <option>Rock armour / seawall installation</option>
+            <option>Revegetation / dune stabilisation</option>
+            <option>Stormwater infrastructure</option>
+            <option>Access track / path works</option>
+            <option>Multiple — see comments</option>
+            <option>Other — see comments</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 13. Comments -->
+      <div class="form-field full">
+        <label><span class="field-num">13</span> Comments <span class="badge badge-req">required</span></label>
+        <textarea id="fComments" placeholder="Any anomalies, access issues, equipment notes, description of works… (enter 'none' if nothing to report)"></textarea>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Processing report upload -->
+  <div class="card">
+    <div class="card-title">Processing report <span class="badge badge-opt" style="vertical-align:middle">optional but recommended</span></div>
+    <div class="file-drop" id="fileDrop">
+      <p>Drop your processing report here, or <strong>click to browse</strong></p>
+      <p style="margin-top:4px; font-size:12px;">PDF, HTML, or ZIP — flying height, image count, accuracy stats will be extracted from this</p>
+      <input type="file" id="fileInput" accept=".pdf,.html,.htm,.zip" />
+      <div class="file-chosen" id="fileChosen"></div>
+    </div>
+    <div class="info-box">
+      Export directly from Metashape, Pix4D, Propeller, or DJI Terra. Should include accuracy summary, GCP residuals, and camera alignment statistics.
+    </div>
+  </div>
+
+  <p id="formError" style="font-size:13px; color:var(--danger-tx); text-align:right; margin-bottom:8px;"></p>
+  <div class="btn-row">
+    <button id="submitBtn" class="primary">Generate &amp; email CSV →</button>
+  </div>
+</div>
+
+<div id="successView" style="display:none">
+  <div class="success-card">
+    <svg viewBox="0 0 24 24"><path d="M22 11.1V12a10 10 0 11-5.9-9.1"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <h3>Your email client should have opened</h3>
+    <p id="successMsg">A draft email to ncdp@deakin.edu.au has been prepared. Please attach the downloaded CSV and send.</p>
+  </div>
+
+  <div class="card" style="margin-top:1rem">
+    <div class="card-title">What to do now</div>
+    <ol style="font-size:13px; color:var(--text-muted); padding-left:1.2rem; line-height:2;">
+      <li>Find the downloaded CSV file in your Downloads folder: <code id="csvFilename" style="font-size:12px; color:var(--teal)"></code></li>
+      <li>Attach it to the email draft that just opened</li>
+      <li>If a processing report is available, attach that too</li>
+      <li>Send — the NCDP team will confirm receipt</li>
+    </ol>
+    <div style="margin-top:1rem; font-size:13px; color:var(--text-muted);">
+      If your email client didn't open, email <a href="mailto:ncdp@deakin.edu.au" style="color:var(--teal)">ncdp@deakin.edu.au</a> manually and attach the CSV.
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Submission summary</div>
+    <div class="preview-wrap" id="successPreview"></div>
+  </div>
+
+  <div class="btn-row" style="margin-top:1rem">
+    <button id="downloadAgainBtn">Download CSV again</button>
+    <button class="primary" id="resetBtn">Submit another survey</button>
+  </div>
+</div>
+</div>
+
+<script>
+// ---- Conditional sub-fields ---------------------------------------------
+function toggleICP() {
+  const v = document.getElementById('fICP').value;
+  const sub = document.getElementById('icpSub');
+  sub.style.display = v === 'Yes' ? 'grid' : 'none';
+  ['fICPCount','fICPEPSG','fICPVert','fICPRMSE'].forEach(id => {
+    document.getElementById(id).required = v === 'Yes';
+  });
+}
+
+function toggleWorks() {
+  const v = document.getElementById('fWorks').value;
+  const sub = document.getElementById('worksSub');
+  sub.style.display = v === 'Yes' ? 'grid' : 'none';
+  document.getElementById('fWorksType').required = v === 'Yes';
+}
+
+// ---- File drop ----------------------------------------------------------
+const fileDrop = document.getElementById('fileDrop');
+const fileInput = document.getElementById('fileInput');
+let reportFile = null;
+
+fileDrop.addEventListener('click', () => fileInput.click());
+fileDrop.addEventListener('dragover', e => { e.preventDefault(); fileDrop.classList.add('over'); });
+fileDrop.addEventListener('dragleave', () => fileDrop.classList.remove('over'));
+fileDrop.addEventListener('drop', e => {
+  e.preventDefault(); fileDrop.classList.remove('over');
+  if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => { if (fileInput.files[0]) setFile(fileInput.files[0]); });
+function setFile(f) {
+  reportFile = f;
+  document.getElementById('fileChosen').textContent = `${f.name} (${(f.size/1e6).toFixed(1)} MB)`;
+}
+
+// ---- Helpers ------------------------------------------------------------
+function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+const CSV_FIELDS = [
+  'submitted_at','email','organisation',
+  'location','pilot_in_command','flight_crew',
+  'predominant_cloud_type','cloud_cover_oktas','wind_speed_knots','wind_direction',
+  'type_of_gcps','data_processing_person_institution',
+  'icps_used','number_of_icps','icp_horizontal_epsg','icp_vertical_datum','icp_rmse_m',
+  'associated_ancillary_data',
+  'coastal_management_works','type_of_works',
+  'comments','processing_report_filename'
+];
+
+function buildRow() {
+  return {
+    submitted_at: new Date().toISOString(),
+    email: v('fEmail'),
+    organisation: v('fOrg'),
+    location: v('fLocation'),
+    pilot_in_command: v('fPilot'),
+    flight_crew: v('fCrew'),
+    predominant_cloud_type: v('fCloudType'),
+    cloud_cover_oktas: v('fCloud'),
+    wind_speed_knots: v('fWind'),
+    wind_direction: v('fWindDir'),
+    type_of_gcps: v('fGCPType'),
+    data_processing_person_institution: v('fProcessedBy'),
+    icps_used: v('fICP'),
+    number_of_icps: v('fICPCount'),
+    icp_horizontal_epsg: v('fICPEPSG'),
+    icp_vertical_datum: v('fICPVert'),
+    icp_rmse_m: v('fICPRMSE'),
+    associated_ancillary_data: v('fAncillary'),
+    coastal_management_works: v('fWorks'),
+    type_of_works: v('fWorksType'),
+    comments: v('fComments'),
+    processing_report_filename: reportFile ? reportFile.name : '',
+  };
+}
+
+function validate() {
+  const required = [
+    ['fEmail','Email'],['fLocation','Location'],['fPilot','Pilot in Command'],
+    ['fCrew','Flight Crew'],['fCloudType','Cloud Type'],['fCloud','Cloud Cover'],
+    ['fWind','Wind Speed'],['fWindDir','Wind Direction'],['fGCPType','Type of GCPs'],
+    ['fProcessedBy','Data Processing person/institution'],
+    ['fICP','ICPs Used'],['fAncillary','Associated ancillary data'],
+    ['fWorks','Coastal Management Works'],['fComments','Comments'],
+  ];
+  for (const [id, label] of required) {
+    if (!v(id)) return `"${label}" is required.`;
+  }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('fEmail'))) return 'Please enter a valid email address.';
+  if (v('fICP') === 'Yes') {
+    if (!v('fICPCount')) return 'Number of ICPs is required when ICPs were used.';
+    if (!v('fICPEPSG')) return 'ICP horizontal EPSG is required when ICPs were used.';
+    if (!v('fICPVert')) return 'ICP vertical datum is required when ICPs were used.';
+    if (!v('fICPRMSE')) return 'ICP RMSE is required when ICPs were used.';
+  }
+  if (v('fWorks') === 'Yes' && !v('fWorksType')) return 'Type of works is required when coastal management works occurred.';
+  return null;
+}
+
+function toCSV(row) {
+  const header = CSV_FIELDS.join(',');
+  const values = CSV_FIELDS.map(k => {
+    const val = String(row[k] ?? '');
+    return (val.includes(',') || val.includes('"') || val.includes('\n'))
+      ? `"${val.replace(/"/g,'""')}"` : val;
+  }).join(',');
+  return header + '\n' + values;
+}
+
+let lastRow = null;
+let lastFilename = '';
+
+function downloadCSV(row, filename) {
+  const blob = new Blob([toCSV(row)], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+// ---- Submit -------------------------------------------------------------
+document.getElementById('submitBtn').addEventListener('click', () => {
+  const err = validate();
+  document.getElementById('formError').textContent = err || '';
+  if (err) { document.getElementById('formError').scrollIntoView({ behavior:'smooth', block:'nearest' }); return; }
+
+  lastRow = buildRow();
+  const site = lastRow.location.replace(/\s+/g,'_');
+  const date = new Date().toISOString().slice(0,10);
+  lastFilename = `NCDP_${site}_${date}_metadata.csv`;
+
+  // Download CSV
+  downloadCSV(lastRow, lastFilename);
+
+  // Open mailto with pre-filled subject and body
+  const subject = encodeURIComponent(`NCDP survey metadata — ${lastRow.location} ${date}`);
+  const body = encodeURIComponent(
+`Hi NCDP team,
+
+Please find attached the survey metadata CSV for:
+
+Location: ${lastRow.location}
+Pilot: ${lastRow.pilot_in_command}
+Date submitted: ${date}
+
+Filename: ${lastFilename}
+${reportFile ? `Processing report: ${reportFile.name}` : ''}
+
+Regards,
+${lastRow.email}`
+  );
+
+  window.location.href = `mailto:ncdp@deakin.edu.au?subject=${subject}&body=${body}`;
+
+  // Show success
+  document.getElementById('csvFilename').textContent = lastFilename;
+  document.getElementById('successMsg').textContent =
+    `A draft email to ncdp@deakin.edu.au has been prepared for ${lastRow.location}. Please attach the downloaded CSV and send.`;
+  document.getElementById('successPreview').textContent = toCSV(lastRow);
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('successView').style.display = 'block';
+  window.scrollTo(0,0);
+});
+
+document.getElementById('downloadAgainBtn').addEventListener('click', () => {
+  if (lastRow) downloadCSV(lastRow, lastFilename);
+});
+
+// ---- Reset --------------------------------------------------------------
+document.getElementById('resetBtn').addEventListener('click', () => {
+  ['fEmail','fOrg','fPilot','fCrew','fProcessedBy','fICPCount','fICPEPSG','fICPRMSE','fComments']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['fLocation','fCloudType','fCloud','fWind','fWindDir','fGCPType','fICP','fICPVert','fAncillary','fWorks','fWorksType']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.selectedIndex = 0; });
+  reportFile = null;
+  document.getElementById('fileChosen').textContent = '';
+  document.getElementById('formError').textContent = '';
+  document.getElementById('icpSub').style.display = 'none';
+  document.getElementById('worksSub').style.display = 'none';
+  document.getElementById('formView').style.display = 'block';
+  document.getElementById('successView').style.display = 'none';
+  window.scrollTo(0,0);
+});
+</script>
+</body>
+</html>
